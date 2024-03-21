@@ -23,7 +23,8 @@ class FileStorage:
     def all(self, cls=None):
         """Returns a dictionary of all objects or filtered by class"""
         if cls:
-            return {k: v for k, v in self.__objects.items() if isinstance(v, cls)}
+            if isinstance(v, cls):
+                return ({k: v for k, v in self.__objects.items()})
         return self.__objects
 
     def new(self, obj):
@@ -54,4 +55,3 @@ class FileStorage:
     def close(self):
         """Reloads objects from JSON file"""
         self.reload()
-
