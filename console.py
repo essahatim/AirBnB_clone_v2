@@ -73,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] is '{' and pline[-1] is '}' \
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -118,21 +118,19 @@ class HBNBCommand(cmd.Cmd):
         try:
             if not arg:
                 raise SyntaxError("Class name is missing")
-                       arg_list = args.split(" ")
-            # Initialize dictionary to hold parameters
+            arg_list = args.split(" ")
             kwargs = {}
-            # Parse each argument in the list
             for arg in arg_list[1:]:
                 arg_splited = arg.split("=")
                 arg_splited[1] = eval(arg_splited[1])
                 if type(arg_splited[1]) is str:
-                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
+                    arg_splited[1] = arg_splited[1].replace("_", " ")\
+                            .replace('"', '\\"')
                 kwargs[arg_splited[0]] = arg_splited[1]
         except SyntaxError:
             print("** class name missing **")
         except NameError:
             print("** class doesn't exist **")
-        # Create an instance of the class with the given parameters
         new_instance = HBNBCommand.classes[arg_list[0]](**kwargs)
         new_instance.save()
         print(new_instance.id)
@@ -148,7 +146,6 @@ class HBNBCommand(cmd.Cmd):
         c_name = new[0]
         c_id = new[2]
 
-        # guard against trailing args
         if c_id and ' ' in c_id:
             c_id = c_id.partition(' ')[0]
 
@@ -198,7 +195,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -213,7 +210,7 @@ class HBNBCommand(cmd.Cmd):
         print_list = []
 
         if args:
-            args = args.split(' ')[0]  # remove possible trailing args
+            args = args.split(' ')[0]
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
@@ -247,18 +244,15 @@ class HBNBCommand(cmd.Cmd):
         """ Updates a certain object with new info """
         c_name = c_id = att_name = att_val = kwargs = ''
 
-        # isolate cls from id/args, ex: (<cls>, delim, <id/args>)
         args = args.partition(" ")
         if args[0]:
             c_name = args[0]
-        else:  # class name not present
+        else:
             print("** class name missing **")
             return
-        if c_name not in HBNBCommand.classes:  # class name invalid
+        if c_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-
-        # isolate id from args
         args = args[2].partition(" ")
         if args[0]:
             c_id = args[0]
@@ -330,6 +324,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
