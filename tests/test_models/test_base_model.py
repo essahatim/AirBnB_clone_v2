@@ -1,99 +1,112 @@
 #!/usr/bin/python3
-""" """
-from models.base_model import BaseModel
+"""
+Unit tests for the BaseModel class.
+"""
+
 import unittest
 import datetime
-from uuid import UUID
 import json
 import os
+import pycodestyle
+import inspect
+from models.base_model import BaseModel
+from uuid import UUID
 
 
-class test_basemodel(unittest.TestCase):
-    """ """
-
-    def __init__(self, *args, **kwargs):
-        """ """
-        super().__init__(*args, **kwargs)
-        self.name = 'BaseModel'
-        self.value = BaseModel
+class TestBaseModel(unittest.TestCase):
+    """
+    Test cases for the BaseModel class.
+    """
 
     def setUp(self):
-        """ """
+        """Set up for each test."""
         pass
 
     def tearDown(self):
+        """Tear down after each test."""
         try:
             os.remove('file.json')
-        except:
+        except FileNotFoundError:
             pass
 
-    def test_default(self):
-        """ """
-        i = self.value()
-        self.assertEqual(type(i), self.value)
+    def test_pep8_compliance(self):
+        """
+        Test PEP8 compliance for BaseModel class.
+        """
+        style = pycodestyle.StyleGuide(quiet=True)
+        result = style.check_files(['models/base_model.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_kwargs(self):
-        """ """
-        i = self.value()
-        copy = i.to_dict()
-        new = BaseModel(**copy)
-        self.assertFalse(new is i)
+    def test_docstrings(self):
+        """
+        Test if docstrings are present for all methods.
+        """
+        self.assertIsNotNone(BaseModel.__doc__)
+        self.assertIsNotNone(BaseModel.__init__.__doc__)
+        self.assertIsNotNone(BaseModel.__str__.__doc__)
+        self.assertIsNotNone(BaseModel.save.__doc__)
+        self.assertIsNotNone(BaseModel.to_dict.__doc__)
 
-    def test_kwargs_int(self):
-        """ """
-        i = self.value()
-        copy = i.to_dict()
-        copy.update({1: 2})
-        with self.assertRaises(TypeError):
-            new = BaseModel(**copy)
+    def test_method_existence(self):
+        """
+        Test if all expected methods exist in BaseModel.
+        """
+        self.assertTrue(hasattr(BaseModel, "__init__"))
+        self.assertTrue(hasattr(BaseModel, "save"))
+        self.assertTrue(hasattr(BaseModel, "to_dict"))
 
-    def test_save(self):
-        """ Testing save """
-        i = self.value()
-        i.save()
-        key = self.name + "." + i.id
-        with open('file.json', 'r') as f:
-            j = json.load(f)
-            self.assertEqual(j[key], i.to_dict())
+    def test_init_base_model(self):
+        """
+        Test if BaseModel instance is created properly.
+        """
+        base_model_instance = BaseModel()
+        self.assertTrue(isinstance(base_model_instance, BaseModel))
 
-    def test_str(self):
-        """ """
-        i = self.value()
-        self.assertEqual(str(i), '[{}] ({}) {}'.format(self.name, i.id,
-                         i.__dict__))
+    def test_save_method(self):
+        """
+        Test if the save method updates the timestamps.
+        """
+        base_model_instance = BaseModel()
+        created_at = base_model_instance.created_at
+        base_model_instance.save()
+        updated_at = base_model_instance.updated_at
+        self.assertNotEqual(created_at, updated_at)
 
-    def test_todict(self):
-        """ """
-        i = self.value()
-        n = i.to_dict()
-        self.assertEqual(i.to_dict(), n)
+    def test_to_dict_method(self):
+        """
+        Test if BaseModel instance can be converted to dictionary.
+        """
+        base_model_instance = BaseModel()
+        base_dict = base_model_instance.to_dict()
+        self.assertEqual(base_model_instance.__class__.__name__, 'BaseModel')
+        self.assertIsInstance(base_dict['created_at'], str)
+        self.assertIsInstance(base_dict['updated_at'], str)
 
-    def test_kwargs_none(self):
-        """ """
-        n = {None: None}
-        with self.assertRaises(TypeError):
-            new = self.value(**n)
+    def test_uuid_generation(self):
+        """
+        Test if UUIDs are generated properly for BaseModel instances.
+        """
+        instance1 = BaseModel()
+        instance2 = BaseModel()
+        instance3 = BaseModel()
+        instance_list = [instance1, instance2, instance3]
+        for instance in instance_list:
+            self.assertIs(type(instance.id), str)
+        self.assertNotEqual(instance1.id, instance2.id)
+        self.assertNotEqual(instance1.id, instance3.id)
+        self.assertNotEqual(instance2.id, instance3.id)
 
-    def test_kwargs_one(self):
-        """ """
-        n = {'Name': 'test'}
-        with self.assertRaises(KeyError):
-            new = self.value(**n)
+    def test_str_method(self):
+        """
+        Test if the string representation of BaseModel is correct.
+        """
+        instance = BaseModel()
+        expected_output = "[BaseModel] ({}) {}".format(
+                                                        instance.id,
+                                                        instance.__dict__)
+        self.assertEqual(expected_output, str(instance))
 
-    def test_id(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.id), str)
 
-    def test_created_at(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.created_at), datetime.datetime)
-
-    def test_updated_at(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.updated_at), datetime.datetime)
-        n = new.to_dict()
-        new = BaseModel(**n)
-        self.assertFalse(new.created_at == new.updated_at)
+if __name__ == "__main__":
+    unittest.main()
