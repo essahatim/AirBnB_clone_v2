@@ -26,7 +26,8 @@ def do_deploy(archive_path):
 
     put(archive_path, "/tmp/")
     with cd("/tmp"):
-        run("tar -xzf {} -C /data/web_static/releases/{}/".format(archive_file, archive_folder))
+        run("tar -xzf {} -C /data/web_static/releases/{}/".format(
+            archive_file, archive_folder))
 
     with cd("/data/web_static/releases/{}/".format(archive_folder)):
         run("mv web_static/* .")
